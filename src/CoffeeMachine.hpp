@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <set>
+#include <map>
 
 enum CoffeeMachineStates { money, pour, ready };
 
@@ -19,13 +19,16 @@ class CoffeeMachine {
     static const std::string machineDidNotTake;
     static const std::string machineError;
     static const std::string machineMoneyBack;
+    static const std::string machineNoMoreMoney;
 
     static const std::string keyWordShutdown;
     static const std::string keyWordWait;
     static const std::string keyWordTake;
 
-    static const std::set<int> coins;
+    static const std::map<int, int> default_coins;
 
+
+    std::map<int, int> coins;
     int price;
     int balance = 0;
     CoffeeMachineStates state = money;

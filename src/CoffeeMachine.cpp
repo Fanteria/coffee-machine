@@ -4,7 +4,7 @@ using std::string;
 using std::cout, std::cin, std::flush;
 using std::getline;
 using std::invalid_argument;
-using std::set;
+using std::map;
 
 const string CoffeeMachine::machineStart{"Starting..."};
 const string CoffeeMachine::machineCost{"Coffee cost: "};
@@ -20,24 +20,37 @@ const string CoffeeMachine::machineCoffeDone{"Coffee done. Take it."};
 const string CoffeeMachine::machineDidNotTake{"You didn't take the coffee."};
 const string CoffeeMachine::machineError{"Something went wrong."};
 const string CoffeeMachine::machineMoneyBack{"Here is money back: "};
+const string CoffeeMachine::machineNoMoreMoney{"I'm have to more money to give you back."};
 
 const string CoffeeMachine::keyWordShutdown{"shutdown"};
 const string CoffeeMachine::keyWordWait{"wait"};
 const string CoffeeMachine::keyWordTake{"take"};
 
-const set<int> CoffeeMachine::coins{1, 2, 5, 10, 20};
+const map<int, int> CoffeeMachine::default_coins{{1,0}, {2,0}, {5,0}, {10,0}, {20,0}};
 
 void CoffeeMachine::moneyBack() {
     int times;
     cout << machineMoneyBack;
     for (auto it = coins.rbegin(); it != coins.rend(); ++it) {
-        times = balance / *it;
+        if (! it->second) continue;
+        times = balance / it->first;
         if (times) {
-            cout << times << "x" << *it << " ";
-            balance %= *it;
+            if (times >= it->second) {
+                cout << it->second << "x" << it->first << " ";
+                balance -= it->second * it->first;
+                it->second = 0;
+            } else {
+                cout << times << "x" << it->first << " ";
+                balance %= it->first;
+                it->second -= times;
+            }    
         }
     }
     cout << "\n";
+    if (balance) {
+        balance = 0;
+        cout << machineNoMoreMoney << "\n";
+    }
 }
 
 void CoffeeMachine::processMoneyState() {
@@ -51,6 +64,7 @@ void CoffeeMachine::processMoneyState() {
         cout << machineInvalidMoney << "\n";
     } else {
         balance += coin;
+        ++coins[coin];
         if (balance >= price){
             balance -= price;
             moneyBack();
@@ -84,12 +98,16 @@ void CoffeeMachine::processReadyState() {
     cout << machineCoffeDone << "\n";
 }
 
-CoffeeMachine::CoffeeMachine(int price) : price(price) {}
+CoffeeMachine::CoffeeMachine(int price) : coins(default_coins), price(price) { }
 
 bool CoffeeMachine::start() {
     cout << machineStart << "\n";
     cout << machineMoney << "\n";
     while (getline(cin, line)) {
+        cout << "Start: ";
+        for (const auto &[key, value] : coins)
+            cout << key << " " << value << " | ";
+        cout << "\n";
         cout << "\n";
         if (line == keyWordShutdown)
             break; 
@@ -109,6 +127,10 @@ bool CoffeeMachine::start() {
                 return false;
         }
         cout << flush;
+    cout << "End:   ";
+    for (const auto &[key, value] : coins)
+        cout << key << " " << value << " | ";
+    cout << "\n";
     }
     cout << machineShutdown << "\n";
     return true;
