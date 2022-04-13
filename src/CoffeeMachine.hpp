@@ -1,3 +1,6 @@
+#ifndef COFFEE_MACHINE_H_INCLUDED
+#define COFFEE_MACHINE_H_INCLUDED
+
 #include <iostream>
 #include <string>
 #include <map>
@@ -47,3 +50,5 @@ public:
 
     bool start();
 }; 
+
+#endif //COFFEE_MACHINE_H_INCLUDED
